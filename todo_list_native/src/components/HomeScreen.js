@@ -1,6 +1,5 @@
 import { connect } from 'react-redux';
 import * as action from '../store/app/actions';
-import moment from 'moment';
 import React, { useState } from 'react';
 import {
   SafeAreaView,
@@ -10,18 +9,15 @@ import {
   ImageBackground,
   TouchableOpacity,
   Pressable,
-  Platform,
   FlatList,
   TouchableHighlight,
   Modal,
   Switch,
 } from 'react-native';
 
-const HomeScreen = ({ navigation, userTasks, removeTask, userTask }) => {
+const HomeScreen = ({ navigation, userTasks, removeTask }) => {
   const [currentTaskId, setCurrentTaskId] = useState(0);
-  // const [taskCompleted, setTaskCompleted] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-
   const [isEnabled, setIsEnabled] = useState(false);
   const toggleSwitch = () => setIsEnabled(previousState => !previousState);
 
@@ -35,10 +31,6 @@ const HomeScreen = ({ navigation, userTasks, removeTask, userTask }) => {
     removeTask(currentTaskId);
     setModalVisible(false);
   };
-
-  // const markAsDone = () =>{
-  //   taskCompleted ? setTaskCompleted(true) : setTaskCompleted(false);
-  // };
 
   return (
     <ImageBackground source={require('../img/background.jpeg')} style={styles.image}>
@@ -65,9 +57,8 @@ const HomeScreen = ({ navigation, userTasks, removeTask, userTask }) => {
                       ios_backgroundColor="#3e3e3e"
                       onValueChange={toggleSwitch}
                       value={isEnabled}
-                      title={isEnabled ?'Задача виконана' : 'Задача не виконана'}>
-                       
-                    </Switch>
+                  />
+
                     <TouchableHighlight
                       activeOpacity={0.6}
                       style={styles.opacityStyleRemove}
@@ -127,7 +118,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerStyle: {
-    // flex: 1,
+
     fontSize: 30,
     textAlign: 'center',
     justifyContent: 'flex-start',
@@ -151,7 +142,7 @@ const styles = StyleSheet.create({
     height: 200,
     justifyContent: 'space-evenly',
     alignItems: 'flex-start',
-    marginBottom: 80,
+
   },
   todoList: {
     borderWidth: 2,
@@ -170,7 +161,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'grey',
   },
   todoView: {
-    // flex: 6,
+
     flexDirection: 'row',
     margin: 5,
     padding: 5,

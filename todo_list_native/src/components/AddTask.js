@@ -1,37 +1,27 @@
 import { connect } from 'react-redux';
 import * as action from '../store/app/actions';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import moment from 'moment';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 
 import {
   SafeAreaView,
-  ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
   View,
   ImageBackground,
   Platform,
-  Pressable,
   Button,
   TextInput,
   TouchableOpacity,
 } from 'react-native';
 
-const AddTask = (
-  { userTasks, setTask, navigation
-  },
-) => {
-    const [taskId, setTaskId] = React.useState(0);
+const AddTask = ({ setTask, navigation }) => {
   const [taskText, setTaskText] = React.useState('');
   const [taskHeader, setTaskHeader] = useState('');
-  const [allTasks, setAllTasks] = useState([]);
-
-  const [datePicker, setDatePicker] = useState(false);
   const [timePicker, setTimePicker] = useState(false);
   const [time, setTime] = useState(new Date(Date.now()));
+  const [error, setError] = useState('Заповнiть усi поля');
 
   const showTimePicker = () => {
     setTimePicker(true);
@@ -50,27 +40,28 @@ const AddTask = (
     setTaskText(text);
   };
 
-  const onAddNewTask = (id) => {
-     if (taskHeader && taskText !== '') setTask({ title:taskHeader,  time:moment(time).format('LT'), task:taskText });
-setTaskHeader('');
-setTaskText('');
-navigation.navigate('Main');
-  };
+  const onAddNewTask = useCallback(() => {
+    if (taskHeader && taskText !== '')
+      setTask({ title: taskHeader, time: moment(time).format('LT'), task: taskText });
+  
+    setTaskHeader('');
+    setTaskText('');
+    navigation.navigate('Main');
+  }, [error, taskHeader, taskText]);
 
   const clearFields = () => {
-setTaskHeader('');
-setTaskText('');
+    setTaskHeader('');
+    setTaskText('');
   };
-
-
 
   return (
     <ImageBackground source={require('../img/background.jpeg')} style={styles.image}>
       <View style={styles.container}>
         <Text style={styles.headerStyle}>Додати нову задачу</Text>
         <SafeAreaView style={styles.inputContainer}>
-        <Text style={styles.highlight}>Обраний час = {moment(time).format('LT')}</Text>
-                {timePicker && (
+        
+          <Text style={styles.highlight}>Обраний час = {moment(time).format('LT')}</Text>
+          {timePicker && (
             <DateTimePicker
               value={time}
               mode={'time'}
@@ -88,31 +79,32 @@ setTaskText('');
             )}
 
             <TextInput
-            value={taskHeader}
+              value={taskHeader}
               placeholder="Заголовок..."
               style={styles.textHeader}
               editable
-              multiline
-              numberOfLines={2}
-              onChangeText={onChangeHeader}
-            ></TextInput>
+              // multiline
+              maxLength={25}
+              onChangeText={onChangeHeader}/>
           </View>
           <TextInput
-          value={taskText}
+            value={taskText}
             placeholder="введiть текст..."
             style={styles.textArea}
             multiline
-            numberOfLines={3}
-            onChangeText={onChangeText}
-            ></TextInput>
-          <TouchableOpacity style={styles.addTaskButton}  disabled={!taskText.length} onPress={onAddNewTask} >
+            numberOfLines={2}
+            onChangeText={onChangeText}/>
+          <TouchableOpacity
+            style={styles.addTaskButton}
+            disabled={!taskText.length && !taskHeader.length}
+            onPress={onAddNewTask}>
             <Text style={styles.highlight}>Додати</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.addTaskButton} onPress={clearFields} >
+          <TouchableOpacity style={styles.addTaskButton} onPress={clearFields}>
             <Text style={styles.highlight}>Очистити</Text>
           </TouchableOpacity>
+          <Text style={{ color: 'red', fontSize:20 }}> {!taskText.length || !taskHeader.length ? error : ''}</Text>
         </SafeAreaView>
-        <SafeAreaView></SafeAreaView>
       </View>
     </ImageBackground>
   );
@@ -144,7 +136,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   timeContainer: {
-      // flex:0,
+    // flex:0,
     justifyContent: 'flex-start',
     flexDirection: 'row',
     alignItems: 'center',
@@ -181,6 +173,7 @@ const styles = StyleSheet.create({
   highlight: {
     fontWeight: 'bold',
     fontSize: 20,
+  
   },
   addTaskButton: {
     alignItems: 'center',
@@ -190,21 +183,22 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderColor: '#7a42f4',
     borderWidth: 2,
-    backgroundColor: 'white',
-    // marginBottom:70,
+    backgroundColor: 'lightpink',
+  },
+  disabledButton: {
+    backgroundColor: 'grey',
   },
 });
 
 const mapStateToProps = (state) => ({
-    userTasks: state.userReducer.userTasks
-   
-   });
-   const mapDispatchToProps = (dispatch) => {
-     return {
-       setTask: (userTask) => {
-         dispatch(action.setTask(userTask));
-       },
-     }
-   };
-   
-   export default connect(mapStateToProps, mapDispatchToProps)(AddTask);
+  userTasks: state.userReducer.userTasks,
+});
+const mapDispatchToProps = (dispatch) => {
+  return {
+    setTask: (userTask) => {
+      dispatch(action.setTask(userTask));
+    },
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(AddTask);
